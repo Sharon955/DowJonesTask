@@ -45,7 +45,7 @@ for (i in 1:yearmonth_num){
   
   
   for (j in seq_along(Dow30_names)) {
-    #Apply CAPM for each subset of data
+#Apply CAPM for each subset of data
     yvar_colname = paste(Dow30_names[j],".Return", sep="")
     camp_name = paste(Dow30_names[j],"_capm", sep="")
     yvar_colname
@@ -53,12 +53,27 @@ for (i in 1:yearmonth_num){
     capm_name <- lm(paste(yvar_colname," ~ RF + Mkt.RF",sep = ""),data = Dow30_permonth)
     capm_coef = capm_name$coefficients[3]
     capm_coef
+    #summary(capm_name)
+    #get p value in summary table (coeff significancy)
+    capm_p_t = summary(capm_name)$coefficients[2,4]
+    capm_p_t
     summary(capm_name)
-    Coef_frame[write_row,j+1] = capm_coef
+    #get p value in ANOVA table (goodness of fit)
+    capm_p_f = anova(capm_name)[1,5]
+    
+    #select coeffs with both p-value <0.05
+    if ((!is.na(capm_p_f)) & (capm_p_f<0.05) & (!is.na(capm_p_f)) & (capm_p_t<0.05)) {
+      Coef_frame[write_row,j+1] = capm_coef
+    } else {
+      Coef_frame[write_row,j+1] = "Not Significant"
+    }
+    
+    
+
     
     
     
-    #Apply Fama French 3 Factors Model for each subset of data
+#Apply Fama French 3 Factors Model for each subset of data
     fama3_name = paste(Dow30_names[j],"_fama3", sep="")
     fama3_name
     fama3_name <- lm(paste(yvar_colname," ~ RF + Mkt.RF + SMB + HML",sep = ""),data = Dow30_permonth)
@@ -70,19 +85,54 @@ for (i in 1:yearmonth_num){
     fama3_coef_hml
     #summary(fama3_name)
     
-    fama3_rmkrf_Coefframe[write_row,j+1] = fama3_coef_rmkrf
-    fama3_SMB_Coefframe[write_row,j+1] = fama3_coef_smb
-    fama3_HML_Coefframe[write_row,j+1] = fama3_coef_hml
+    
+    #get p value in summary table (coeff significancy)
+    fama3_rmkrf_p_t = summary(fama3_name)$coefficients[2,4]
+    fama3_smb_p_t = summary(fama3_name)$coefficients[3,4]
+    fama3_hml_p_t = summary(fama3_name)$coefficients[4,4]
+    #fama3_hml_p_t
+    
+    #get p value in ANOVA table (goodness of fit)
+    fama3_rmkrf_p_f = anova(fama3_name)[1,5]
+    fama3_smb_p_f = anova(fama3_name)[2,5]
+    fama3_hml_p_f = anova(fama3_name)[3,5]
+    #fama3_hml_p_f
+    
+    #select coeffs with both p-value <0.05
+    if ((!is.na(fama3_rmkrf_p_f)) & (fama3_rmkrf_p_f<0.05) & (!is.na(fama3_rmkrf_p_t )) & (fama3_rmkrf_p_t <0.05)) {
+      fama3_rmkrf_Coefframe[write_row,j+1] = fama3_coef_rmkrf
+      
+    } else {
+      fama3_rmkrf_Coefframe[write_row,j+1] = "Not Significant"
+    }
     
     
+    if ((!is.na(fama3_smb_p_f)) & (fama3_smb_p_f<0.05) & (!is.na(fama3_smb_p_t )) & (fama3_smb_p_t <0.05)) {
+      fama3_SMB_Coefframe[write_row,j+1] = fama3_coef_smb
+      
+    } else {
+      fama3_SMB_Coefframe[write_row,j+1] = "Not Significant"
+    }
     
     
-    #Apply Fama Cohort 4 Factors Model for each subset of data
+    if ((!is.na(fama3_hml_p_f)) & (fama3_hml_p_f<0.05) & (!is.na(fama3_hml_p_t )) & (fama3_hml_p_t <0.05)) {
+      fama3_HML_Coefframe[write_row,j+1] = fama3_coef_hml
+      
+    } else {
+      fama3_HML_Coefframe[write_row,j+1] = "Not Significant"
+    }
+    
+
+    
+    
+
+    
+#Apply Fama Cohort 4 Factors Model for each subset of data
     fama4_name = paste(Dow30_names[j],"_fama3", sep="")
     fama4_name
     fama4_name <- lm(paste(yvar_colname," ~ RF + Mkt.RF + SMB + HML + RMW",sep = ""),data = Dow30_permonth)
     fama4_coef_rmkrf = fama4_name$coefficients[3]
-    summary(fama4_name)
+    anova(fama4_name)
     fama4_coef_smb = fama4_name$coefficients[4]
     fama4_coef_hml = fama4_name$coefficients[5]
     fama4_coef_rmw = fama4_name$coefficients[6]
@@ -91,20 +141,60 @@ for (i in 1:yearmonth_num){
     fama4_coef_hml
     fama4_coef_rmw
     
-    fama4_rmkrf_Coefframe[write_row,j+1] = fama4_coef_rmkrf
-    fama4_SMB_Coefframe[write_row,j+1] = fama4_coef_smb
-    fama4_HML_Coefframe[write_row,j+1] = fama4_coef_hml
-    fama4_RMW_Coefframe[write_row,j+1] = fama4_coef_rmw
+    
+    #get p value in summary table (coeff significancy)
+    fama4_rmkrf_p_t = summary(fama4_name)$coefficients[2,4]
+    fama4_smb_p_t = summary(fama4_name)$coefficients[3,4]
+    fama4_hml_p_t = summary(fama4_name)$coefficients[4,4]
+    fama4_rmw_p_t = summary(fama4_name)$coefficients[5,4]
+    fama4_rmw_p_t
+    
+    #get p value in ANOVA table (goodness of fit)
+    fama4_rmkrf_p_f = anova(fama4_name)[1,5]
+    fama4_smb_p_f = anova(fama4_name)[2,5]
+    fama4_hml_p_f = anova(fama4_name)[3,5]
+    fama4_rmw_p_f = anova(fama4_name)[4,5]
+    fama4_rmkrf_p_f
+    
+    #select coeffs with both p-value <0.05
+    if ((!is.na(fama4_rmkrf_p_f)) & (fama4_rmkrf_p_f<0.05) & (!is.na(fama4_rmkrf_p_t)) & (fama4_rmkrf_p_t<0.05)) {
+      fama4_rmkrf_Coefframe[write_row,j+1] = fama4_coef_rmkrf
+      
+    } else {
+      fama4_rmkrf_Coefframe[write_row,j+1] = "Not Significant"
+    }
+    
+    if ((!is.na(fama4_smb_p_f)) & (fama4_smb_p_f<0.05) & (!is.na(fama4_smb_p_t)) & (fama4_smb_p_t<0.05)) {
+      fama4_SMB_Coefframe[write_row,j+1] = fama4_coef_smb
+      
+    } else {
+      fama4_SMB_Coefframe[write_row,j+1] = "Not Significant"
+    }
+    
+    if ((!is.na(fama4_hml_p_f)) & (fama4_hml_p_f<0.05) & (!is.na(fama4_hml_p_t)) & (fama4_hml_p_t<0.05)) {
+      fama4_HML_Coefframe[write_row,j+1] = fama4_coef_hml
+      
+    } else {
+      fama4_HML_Coefframe[write_row,j+1] = "Not Significant"
+    }
+    
+    if ((!is.na(fama4_rmw_p_f)) & (fama4_rmw_p_f<0.05) & (!is.na(fama4_rmw_p_t)) & (fama4_rmw_p_t<0.05)) {
+      fama4_RMW_Coefframe[write_row,j+1] = fama4_coef_rmw
+      
+    } else {
+      fama4_RMW_Coefframe[write_row,j+1] = "Not Significant"
+    }
+    
+
     
     
     
-    
-    #Apply Fama French 5 Factors Model for each subset of data
+#Apply Fama French 5 Factors Model for each subset of data
     fama5_name = paste(Dow30_names[j],"_fama3", sep="")
     fama5_name
     fama5_name <- lm(paste(yvar_colname," ~ RF + Mkt.RF + SMB + HML + RMW + CMA",sep = ""),data = Dow30_permonth)
     fama5_coef_rmkrf = fama5_name$coefficients[3]
-    summary(fama5_name)
+    anova(fama5_name)
     fama5_coef_smb = fama5_name$coefficients[4]
     fama5_coef_hml = fama5_name$coefficients[5]
     fama5_coef_rmw = fama5_name$coefficients[6]
@@ -115,32 +205,81 @@ for (i in 1:yearmonth_num){
     fama5_coef_rmw
     fama5_coef_cma
     
-    fama5_rmkrf_Coefframe[write_row,j+1] = fama5_coef_rmkrf
-    fama5_SMB_Coefframe[write_row,j+1] = fama5_coef_smb
-    fama5_HML_Coefframe[write_row,j+1] = fama5_coef_hml
-    fama5_RMW_Coefframe[write_row,j+1] = fama5_coef_rmw
-    fama5_CMA_Coefframe[write_row,j+1] = fama5_coef_cma
     
+    
+    
+    #get p value in summary table (coeff significancy)
+    fama5_rmkrf_p_t = summary(fama5_name)$coefficients[2,4]
+    fama5_smb_p_t = summary(fama5_name)$coefficients[3,4]
+    fama5_hml_p_t = summary(fama5_name)$coefficients[4,4]
+    fama5_rmw_p_t = summary(fama5_name)$coefficients[5,4]
+    fama5_cma_p_t = summary(fama5_name)$coefficients[6,4]
+    #fama5_rmkrf_p_t
+
+    #get p value in ANOVA table (goodness of fit)
+    fama5_rmkrf_p_f = anova(fama5_name)[1,5]
+    fama5_smb_p_f = anova(fama5_name)[2,5]
+    fama5_hml_p_f = anova(fama5_name)[3,5]
+    fama5_rmw_p_f = anova(fama5_name)[4,5]
+    fama5_cma_p_f = anova(fama5_name)[5,5]
+    #fama5_rmkrf_p_f
+    
+    #select coeffs with both p-value <0.05
+    if ((!is.na(fama5_rmkrf_p_f)) & (fama5_rmkrf_p_f<0.05) & (!is.na(fama5_rmkrf_p_t)) & (fama5_rmkrf_p_t<0.05)) {
+      fama5_rmkrf_Coefframe[write_row,j+1] = fama5_coef_rmkrf
+      
+    } else {
+      fama5_rmkrf_Coefframe[write_row,j+1] = "Not Significant"
+    }
+    
+    if ((!is.na(fama5_smb_p_f)) & (fama5_smb_p_f<0.05) & (!is.na(fama5_smb_p_t)) & (fama5_smb_p_t<0.05)) {
+      fama5_SMB_Coefframe[write_row,j+1] = fama5_coef_smb
+      
+    } else {
+      fama5_SMB_Coefframe[write_row,j+1] = "Not Significant"
+    }
+    
+    if ((!is.na(fama5_hml_p_f)) & (fama5_hml_p_f<0.05) & (!is.na(fama5_hml_p_t)) & (fama5_hml_p_t<0.05)) {
+      fama5_HML_Coefframe[write_row,j+1] = fama5_coef_hml
+      
+    } else {
+      fama5_HML_Coefframe[write_row,j+1] = "Not Significant"
+    }
+    
+    if ((!is.na(fama5_rmw_p_f)) & (fama5_rmw_p_f<0.05) & (!is.na(fama5_rmw_p_t)) & (fama5_rmw_p_t<0.05)) {
+      fama5_RMW_Coefframe[write_row,j+1] = fama5_coef_rmw
+      
+    } else {
+      fama5_RMW_Coefframe[write_row,j+1] = "Not Significant"
+    }
+    
+    if ((!is.na(fama5_cma_p_f)) & (fama5_cma_p_f<0.05) & (!is.na(fama5_cma_p_t)) & (fama5_cma_p_t<0.05)) {
+      fama5_CMA_Coefframe[write_row,j+1] = fama5_coef_cma
+      
+    } else {
+      fama5_CMA_Coefframe[write_row,j+1] = "Not Significant"
+    }
     
   } 
   write_row = write_row+1
 }
 
-write.csv(Coef_frame,"Model_Coeff/CAMP_Coeff.csv", row.names = FALSE)
-write.csv(fama3_rmkrf_Coefframe,"Model_Coeff/Fama3_RmkRf_Coeff.csv", row.names = FALSE)
-write.csv(fama3_SMB_Coefframe,"Model_Coeff/Fama3_SMB_Coeff.csv", row.names = FALSE)
-write.csv(fama3_HML_Coefframe,"Model_Coeff/Fama3_HML_Coeff.csv", row.names = FALSE)
+#write.csv(Coef_frame,"Model_Coeff/CAMP_Coeff.csv", row.names = FALSE)
 
-write.csv(fama4_rmkrf_Coefframe,"Model_Coeff/Fama4_RmkRf_Coeff.csv", row.names = FALSE)
-write.csv(fama4_SMB_Coefframe,"Model_Coeff/Fama4_SMB_Coeff.csv", row.names = FALSE)
-write.csv(fama4_HML_Coefframe,"Model_Coeff/Fama4_HML_Coeff.csv", row.names = FALSE)
-write.csv(fama4_RMW_Coefframe,"Model_Coeff/Fama4_RMW_Coeff.csv", row.names = FALSE)
+#write.csv(fama3_rmkrf_Coefframe,"Model_Coeff/Fama3_RmkRf_Coeff.csv", row.names = FALSE)
+#write.csv(fama3_SMB_Coefframe,"Model_Coeff/Fama3_SMB_Coeff.csv", row.names = FALSE)
+#write.csv(fama3_HML_Coefframe,"Model_Coeff/Fama3_HML_Coeff.csv", row.names = FALSE)
 
-write.csv(fama5_rmkrf_Coefframe,"Model_Coeff/Fama5_RmkRf_Coeff.csv", row.names = FALSE)
-write.csv(fama5_SMB_Coefframe,"Model_Coeff/Fama5_SMB_Coeff.csv", row.names = FALSE)
-write.csv(fama5_HML_Coefframe,"Model_Coeff/Fama5_HML_Coeff.csv", row.names = FALSE)
-write.csv(fama5_RMW_Coefframe,"Model_Coeff/Fama5_RMW_Coeff.csv", row.names = FALSE)
-write.csv(fama5_CMA_Coefframe,"Model_Coeff/Fama5_CMA_Coeff.csv", row.names = FALSE)
+#write.csv(fama4_rmkrf_Coefframe,"Model_Coeff/Fama4_RmkRf_Coeff.csv", row.names = FALSE)
+#write.csv(fama4_SMB_Coefframe,"Model_Coeff/Fama4_SMB_Coeff.csv", row.names = FALSE)
+#write.csv(fama4_HML_Coefframe,"Model_Coeff/Fama4_HML_Coeff.csv", row.names = FALSE)
+#write.csv(fama4_RMW_Coefframe,"Model_Coeff/Fama4_RMW_Coeff.csv", row.names = FALSE)
+
+#write.csv(fama5_rmkrf_Coefframe,"Model_Coeff/Fama5_RmkRf_Coeff.csv", row.names = FALSE)
+#write.csv(fama5_SMB_Coefframe,"Model_Coeff/Fama5_SMB_Coeff.csv", row.names = FALSE)
+#write.csv(fama5_HML_Coefframe,"Model_Coeff/Fama5_HML_Coeff.csv", row.names = FALSE)
+#write.csv(fama5_RMW_Coefframe,"Model_Coeff/Fama5_RMW_Coeff.csv", row.names = FALSE)
+#write.csv(fama5_CMA_Coefframe,"Model_Coeff/Fama5_CMA_Coeff.csv", row.names = FALSE)
 
 
 
